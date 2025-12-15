@@ -117,7 +117,7 @@ function parseQuizText(text){
   let cur=[], nums=[];
   for (let i=0;i<lines.length;i++){
     const line=lines[i], ln=i+1;
-    if (line.trim()==="---"){
+    if (/^-{3,}$/.test(line.trim())){
       if (cur.some(x=>x.trim()!=="")) blocks.push({lines:cur, lineNums:nums});
       cur=[]; nums=[];
       continue;
