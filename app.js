@@ -502,13 +502,25 @@ function renderImport(){
 
   // generator tab hooks
   if (active==="generator"){
-    $("#genTopic").oninput = (e)=>{ state.genForm.topic=e.target.value; saveState(state); render(); };
-    $("#genCount").oninput = (e)=>{ state.genForm.count=clamp(parseInt(e.target.value||"12",10),1,80); saveState(state); render(); };
-    $("#genDiff").onchange = (e)=>{ state.genForm.difficulty=e.target.value; saveState(state); render(); };
-    $("#genStyle").oninput = (e)=>{ state.genForm.style=e.target.value; saveState(state); render(); };
-    $("#genEvidenceOn").onchange = (e)=>{ state.genForm.includeEvidence=(e.target.value==="yes"); saveState(state); render(); };
-    $("#genTagsOn").onchange = (e)=>{ state.genForm.includeTags=(e.target.value==="yes"); saveState(state); render(); };
-    $("#genEvidence").oninput = (e)=>{ state.genForm.evidenceHint=e.target.value; saveState(state); render(); };
+    function updatePromptPreview(){
+      const box = document.getElementById("promptBox");
+      if (box) box.value = buildPrompt(state.genForm);
+    }
+  
+    $("#genTopic").oninput = (e)=>{ state.genForm.topic = e.target.value; saveState(state); updatePromptPreview(); };
+    
+    $("#genCount").oninput = (e)=>{ state.genForm.count = clamp(parseInt(e.target.value||"12",10),1,80); saveState(state); updatePromptPreview(); };
+    
+    $("#genDiff").onchange = (e)=>{ state.genForm.difficulty = e.target.value; saveState(state); updatePromptPreview(); };
+    
+    $("#genStyle").oninput = (e)=>{ state.genForm.style = e.target.value; saveState(state); updatePromptPreview(); };
+    
+    $("#genEvidenceOn").onchange = (e)=>{ state.genForm.includeEvidence = (e.target.value==="yes"); saveState(state); updatePromptPreview(); };
+    
+    $("#genTagsOn").onchange = (e)=>{ state.genForm.includeTags = (e.target.value==="yes"); saveState(state); updatePromptPreview(); };
+    
+    $("#genEvidence").oninput = (e)=>{ state.genForm.evidenceHint = e.target.value; saveState(state); updatePromptPreview(); };
+
 
     $("#btnCopyPrompt").onclick = async ()=>{
       const ok = await copyToClipboard(buildPrompt(state.genForm));
