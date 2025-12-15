@@ -239,6 +239,30 @@ Distractor design rules (required):
 - Keep correct letters balanced across the quiz.
 - No long copyrighted quotes; paraphrase.
 
+CRITICAL FORMATTING (must follow):
+- Separate questions ONLY with a line that is exactly:
+---
+- Do NOT use long dashed lines like "-----" or "________" or "—".
+- Do NOT add any headings, intros, or extra commentary before/after the blocks.
+- Output must be plain text only.
+
+EXAMPLE (follow exactly):
+
+Q: Why did the Kansas-Nebraska Act intensify sectional conflict?
+A) It applied popular sovereignty to KS/NE above 36°30°, undermining the Missouri Compromise and triggering violent competition.
+B) It applied popular sovereignty only to the Mexican Cession, reducing conflict.
+C) It admitted California as a free state and strengthened the fugitive slave law.
+D) It was a Supreme Court ruling that Congress could not ban slavery in territories.
+ANS: A
+EXP_CORRECT: It replaced the Missouri Compromise line with popular sovereignty in KS/NE, so both sides rushed settlers in, leading to “Bleeding Kansas.”
+EXP_A: Correct—this matches the notes.
+EXP_B: Wrong—Mexican Cession + popular sovereignty is Compromise of 1850, not Kansas-Nebraska.
+EXP_C: Wrong—those are Compromise of 1850 pieces.
+EXP_D: Wrong—this describes Dred Scott, not Kansas-Nebraska.
+EVID: Notes p.__
+TAGS: Unit __, Sectionalism
+---
+
 Output ONLY in this exact format (repeat for every question):
 Q: <question text>
 A) <choice text>
