@@ -646,6 +646,28 @@ function renderErrorsIfAny(){
   `;
 }
 
+function renderMD(s){
+  // Escape first (prevents XSS), then add a tiny markdown layer
+  let out = escapeHtml(s ?? "");
+
+  // line breaks
+  out = out.replace(/\n/g, "<br>");
+
+  // inline code
+  out = out.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+  // bold
+  out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+
+  // italic (single asterisks)
+  out = out.replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, "$1<em>$2</em>");
+
+  // strikethrough
+  out = out.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+
+  return out;
+}
+
 function loadQuizFromText(text, source){
   const {questions, errors} = parseQuizText(text);
   state.parseErrors = errors.slice(0, 8);
@@ -734,7 +756,7 @@ function renderQuiz(){
         <div class="muted">Score: <b>${st.right}/${st.total}</b> (${pct}%)</div>
       </div>
 
-      <p class="qText">${escapeHtml(q.q)}</p>
+      <p class="qText">${renderMD(q.q)}</p>
 
       <div class="actions" style="margin-top:0">
         <button class="btn small ${state.flags[q.id] ? "danger":""}" id="btnFlag">${state.flags[q.id] ? "🚩 Flagged" : "🏳️ Flag"}</button>
@@ -782,7 +804,7 @@ function renderQuiz(){
     btn.innerHTML = `
       <div class="label">
         <div class="badge">${L}</div>
-        <div>${escapeHtml(txt)}</div>
+        <div>${renderMD(txt)}</div>
       </div>
       <div class="iconDot">${rightIcon || " "}</div>
     `;
@@ -831,13 +853,13 @@ function renderExplain(q, picked){
   const showAll = state.settings.showAllOptionFeedback;
   const lines = [];
   lines.push(`<h3>Why the correct answer is correct</h3>`);
-  lines.push(`<p>${escapeHtml(q.expCorrect)}</p>`);
+  lines.push(`<p>${renderMD(q.expCorrect)}</p>`);
   if (!showAll) return `<div class="explain">${lines.join("")}</div>`;
 
   lines.push(`<h3>Option feedback</h3>`);
   for (const L of OPTS){
     const mark = (L===q.ans) ? "✅" : (L===picked ? "❌" : "•");
-    lines.push(`<p><b>${mark} ${L}:</b> ${escapeHtml(q.expEach[L])}</p>`);
+    lines.push(`<p><b>${mark} ${L}:</b> ${renderMD(q.expEach[L])}</p>`);
   }
   return `<div class="explain">${lines.join("")}</div>`;
 }
