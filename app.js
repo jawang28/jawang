@@ -95,6 +95,7 @@ function parseFieldLine(line){
 }
 function autoFixText(text){
   let t = text.replace(/\r\n/g,"\n");
+  t = t.replace(/^[ \t]*[-–—_]{3,}[ \t]*$/gm, "---");
   t = t.replace(/^\s*ans\s*:/gim,"ANS:");
   t = t.replace(/^\s*answer\s*:/gim,"ANS:");
   t = t.replace(/^\s*exp_correct\s*:/gim,"EXP_CORRECT:");
