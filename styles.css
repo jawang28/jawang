@@ -2,8 +2,8 @@
   --bg:#0b0b12;
   --panel:rgba(255,255,255,0.06);
   --stroke:rgba(255,255,255,0.10);
-  --text:rgba(255,255,255,0.92);
-  --muted:rgba(255,255,255,0.65);
+  --text:#ffffff;
+  --muted:rgba(255,255,255,0.75);
   --muted2:rgba(255,255,255,0.45);
   --purple:#a855f7;
   --purple2:#7c3aed;
@@ -20,7 +20,11 @@ button{
 }
 
 .choice{
-  color: var(--text);
+  color: #ffffff;
+}
+
+.choice .label > div:last-child{
+  color: #ffffff;
 }
 html,body{ height:100%; }
 body{
