@@ -832,19 +832,32 @@ function renderResults(){
   };
 
   const review = (mode)=>{
-    const ids = state.quiz.questions.map(q=>q.id);
-    const missed = ids.filter(id => state.answers[id] && !state.answers[id].correct);
-    const flagged = ids.filter(id => state.flags[id]);
+  const ids = state.quiz.questions.map(q=>q.id);
+  const missed = ids.filter(id => state.answers[id] && !state.answers[id].correct);
+  const flagged = ids.filter(id => state.flags[id]);
 
-    const list = mode==="missed" ? missed : mode==="flagged" ? flagged : ids;
-    // map to indices in quiz.questions
-    const idxs = list.map(id => state.quiz.questions.findIndex(q=>q.id===id)).filter(i=>i>=0);
-    state.order = idxs.length ? idxs : state.order;
-    state.index = 0;
-    state.route = "quiz";
-    saveState(state);
-    render();
-  };
+  const list = mode==="missed" ? missed : mode==="flagged" ? flagged : ids;
+
+  // ✅ If nothing to review, stay on Results and tell the user
+  if (mode === "missed" && list.length === 0){
+    alert("No missed questions to review.");
+    return;
+  }
+  if (mode === "flagged" && list.length === 0){
+    alert("No flagged questions to review.");
+    return;
+  }
+
+  const idxs = list
+    .map(id => state.quiz.questions.findIndex(q=>q.id===id))
+    .filter(i=>i>=0);
+
+  state.order = idxs;
+  state.index = 0;
+  state.route = "quiz";
+  saveState(state);
+  render();
+};
 
   $("#btnReviewAll").onclick = ()=> review("all");
   $("#btnReviewMissed").onclick = ()=> review("missed");
