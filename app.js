@@ -4,6 +4,8 @@
 const STORAGE_KEY = "quizcraft_static_v1";
 
 const $ = (sel, root=document) => root.querySelector(sel);
+const clone = (obj) =>
+  (window.structuredClone ? structuredClone(obj) : JSON.parse(JSON.stringify(obj)));
 
 function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 function nowMs(){ return Date.now(); }
@@ -320,7 +322,7 @@ const defaultState = {
   elapsed: 0
 };
 
-let state = structuredClone(defaultState);
+let state = clone(defaultState);
 
 // ---- quiz helpers ----
 function fmtTime(ms){
@@ -905,7 +907,7 @@ async function shareLinkCurrent(){
 async function shareLinkFromText(text){
   const {questions, errors} = parseQuizText(text);
   if (errors.length) return alert("Fix formatting errors first.");
-  const pkg = structuredClone(defaultState);
+  const pkg = clone(defaultState);
   pkg.quiz = { questions, meta: { source:"shared-text", createdAt:new Date().toISOString() } };
   pkg.order = questions.map((_,i)=>i);
   pkg.route = "quiz";
@@ -1228,7 +1230,7 @@ function renderSettingsDrawer(){
   $("#btnResetAll").onclick = ()=>{
     if (!confirm("Reset everything? This clears your quiz + progress.")) return;
     clearState();
-    state = structuredClone(defaultState);
+    state = clone(defaultState);
     location.hash = "";
     render();
   };
