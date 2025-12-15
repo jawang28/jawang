@@ -691,7 +691,7 @@ function renderQuiz(){
       <div class="actions">
         <button class="btn" id="btnPrev" ${state.index===0?"disabled":""}>← Back</button>
         <button class="btn" id="btnNext" ${state.index===state.order.length-1?"disabled":""}>Next →</button>
-        <button class="btn" id="btnSkip">Skip</button>
+        <button class="btn" id="btnSkip" ${state.index===state.order.length-1?"disabled":""}>Skip</button>
       </div>
 
       <div class="hr"></div>
