@@ -332,15 +332,27 @@ function stats(){
   return { total, right, wrong, unanswered: total-right-wrong };
 }
 
+function stopTimerIfDone(){
+  const st = stats();
+  if (st.unanswered === 0 && state.startMs){
+    state.elapsed = nowMs() - state.startMs; // freeze final time
+    state.startMs = null;                   // stops timer
+  }
+}
+
 // ---- navigation ----
 function chooseAnswer(qid, pick){
   if (state.answers[qid]) return;
   const q = state.quiz.questions.find(x=>x.id===qid);
   const correct = pick === q.ans;
   state.answers[qid] = { pick, correct, at: new Date().toISOString() };
+
+  stopTimerIfDone(); // ✅ add this
+
   saveState(state);
   render();
 }
+
 function toggleFlag(qid){
   state.flags[qid] = !state.flags[qid];
   saveState(state);
@@ -761,7 +773,12 @@ function renderQuiz(){
   $("#btnFlag").onclick = ()=> toggleFlag(q.id);
   $("#btnBackImport").onclick = ()=>{ state.route="import"; saveState(state); render(); };
   $("#btnShareLink").onclick = shareLinkCurrent;
-  $("#btnFinish").onclick = ()=>{ state.route="results"; saveState(state); render(); };
+  $("#btnFinish").onclick = ()=>{
+    stopTimerIfDone();
+    state.route="results";
+    saveState(state);
+    render();
+  };
 }
 
 function renderExplain(q, picked){
