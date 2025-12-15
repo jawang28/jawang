@@ -503,23 +503,26 @@ function renderImport(){
   // generator tab hooks
   if (active==="generator"){
     function updatePromptPreview(){
-      const box = document.getElementById("promptBox");
-      if (box) box.value = buildPrompt(state.genForm);
-    }
+    const box = document.getElementById("promptBox");
+    if (box) box.value = buildPrompt(state.genForm);
+  }
   
-    $("#genTopic").oninput = (e)=>{ state.genForm.topic = e.target.value; saveState(state); updatePromptPreview(); };
-    
-    $("#genCount").oninput = (e)=>{ state.genForm.count = clamp(parseInt(e.target.value||"12",10),1,80); saveState(state); updatePromptPreview(); };
-    
-    $("#genDiff").onchange = (e)=>{ state.genForm.difficulty = e.target.value; saveState(state); updatePromptPreview(); };
-    
-    $("#genStyle").oninput = (e)=>{ state.genForm.style = e.target.value; saveState(state); updatePromptPreview(); };
-    
-    $("#genEvidenceOn").onchange = (e)=>{ state.genForm.includeEvidence = (e.target.value==="yes"); saveState(state); updatePromptPreview(); };
-    
-    $("#genTagsOn").onchange = (e)=>{ state.genForm.includeTags = (e.target.value==="yes"); saveState(state); updatePromptPreview(); };
-    
-    $("#genEvidence").oninput = (e)=>{ state.genForm.evidenceHint = e.target.value; saveState(state); updatePromptPreview(); };
+  // type = update preview only (no save, no render)
+  $("#genTopic").oninput = (e)=>{ state.genForm.topic = e.target.value; updatePromptPreview(); };
+  $("#genCount").oninput = (e)=>{ state.genForm.count = clamp(parseInt(e.target.value||"12",10),1,80); updatePromptPreview(); };
+  $("#genStyle").oninput = (e)=>{ state.genForm.style = e.target.value; updatePromptPreview(); };
+  $("#genEvidence").oninput = (e)=>{ state.genForm.evidenceHint = e.target.value; updatePromptPreview(); };
+  
+  // change = save once when you finish editing
+  $("#genTopic").onchange = ()=> saveState(state);
+  $("#genCount").onchange = ()=> saveState(state);
+  $("#genStyle").onchange = ()=> saveState(state);
+  $("#genEvidence").onchange = ()=> saveState(state);
+  
+  $("#genDiff").onchange = (e)=>{ state.genForm.difficulty = e.target.value; saveState(state); updatePromptPreview(); };
+  $("#genEvidenceOn").onchange = (e)=>{ state.genForm.includeEvidence = (e.target.value==="yes"); saveState(state); updatePromptPreview(); };
+  $("#genTagsOn").onchange = (e)=>{ state.genForm.includeTags = (e.target.value==="yes"); saveState(state); updatePromptPreview(); };
+
 
 
     $("#btnCopyPrompt").onclick = async ()=>{
