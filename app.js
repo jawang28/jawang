@@ -107,7 +107,8 @@ function autoFixText(text){
   return t;
 }
 function countBlocks(text){
-  return text.replace(/\r\n/g,"\n").split("\n").filter(l => l.trim()==="---").length;
+  return text.replace(/\r\n/g,"\n").split("\n")
+    .filter(l => /^([-–—_]{3,}|#{3,})$/.test(l.trim())).length;
 }
 
 function parseQuizText(text){
@@ -118,7 +119,7 @@ function parseQuizText(text){
   let cur=[], nums=[];
   for (let i=0;i<lines.length;i++){
     const line=lines[i], ln=i+1;
-    if (/^[-–—_]{3,}$/.test(line.trim())){
+    if (/^([-–—_]{3,}|#{3,})$/.test(line.trim())){
       if (cur.some(x=>x.trim()!=="")) blocks.push({lines:cur, lineNums:nums});
       cur=[]; nums=[];
       continue;
@@ -247,7 +248,7 @@ Distractor design rules (required):
 
 CRITICAL FORMATTING (must follow):
 - Separate questions ONLY with a line that is exactly:
----
+###
 - Do NOT use long dashed lines like "-----" or "________" or "—".
 - Do NOT add any headings, intros, or extra commentary before/after the blocks.
 - Output must be plain text only.
@@ -267,7 +268,7 @@ EXP_C: Wrong—those are Compromise of 1850 pieces.
 EXP_D: Wrong—this describes Dred Scott, not Kansas-Nebraska.
 EVID: Notes p.__
 TAGS: Unit __, Sectionalism
----
+###
 
 Output ONLY in this exact format (repeat for every question):
 Q: <question text>
@@ -283,7 +284,7 @@ EXP_C: <feedback for option C (1–2 sentences)>
 EXP_D: <feedback for option D (1–2 sentences)>
 ${includeEvidence ? "EVID: <short source cue like “Doc p.3” or “Paragraph 5”>" : ""}
 ${includeTags ? `TAGS: ${tagHint || "<comma-separated tags>"}` : ""}
----
+###
 
 Now generate ${count} questions.`.trim();
 }
