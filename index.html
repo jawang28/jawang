@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>JWQuizzer</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>JWQuizzer</h1>
+          <div class="sub">Dark • Smooth • Shareable • A/B/C/D • Feedback for every option</div>
+        </div>
+      </div>
+      <div class="pills">
+        <span class="pill">⌨️ 1–4 answer • ←/→ nav • F flag</span>
+        <button id="btnOpenSettings" class="btn small" type="button">⚙️ Settings</button>
+      </div>
+    </header>
+
+    <main id="app" class="fadeIn" aria-live="polite"></main>
+
+    <footer class="footer">
+      <span class="muted">Generate questions by asking ChatGPT with the prompt template, then paste the output.</span>
+    </footer>
+  </div>
+
+  <div id="drawerOverlay" class="drawerOverlay hidden" role="dialog" aria-modal="true">
+    <div class="drawer" role="document">
+      <div class="cardHeader">
+        <div>
+          <p class="title">Settings</p>
+          <p class="desc">These change quiz behavior and sharing.</p>
+        </div>
+        <button id="btnCloseSettings" class="btn small" type="button">Close</button>
+      </div>
+
+      <div class="twoCol" id="settingsForm"></div>
+
+      <div class="hr"></div>
+
+      <div class="actions">
+        <button id="btnResetAll" class="btn danger" type="button">Reset everything</button>
+        <button id="btnDownloadState" class="btn" type="button">Download state JSON</button>
+      </div>
+
+      <p class="notice">Sharing: use <b>Share Link</b> on Import/Quiz screens.</p>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
