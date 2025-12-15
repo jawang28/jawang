@@ -21,11 +21,24 @@ button{
 
 .choice{
   color: #ffffff;
+    .choice,
+  .choice:hover,
+  .choice.selected,
+  .choice.correct,
+  .choice.wrong{
+    color: #ffffff !important;
+  }
+  
+  .choice .label,
+  .choice .label *{
+    color: #ffffff !important;
+  }
+  
+  .choice .badge{
+    color: var(--muted) !important;
+  }
 }
 
-.choice .label > div:last-child{
-  color: #ffffff;
-}
 html,body{ height:100%; }
 body{
   margin:0;
