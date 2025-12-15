@@ -4,8 +4,6 @@
 const STORAGE_KEY = "quizcraft_static_v1";
 
 const $ = (sel, root=document) => root.querySelector(sel);
-const clone = (obj) =>
-  (window.structuredClone ? structuredClone(obj) : JSON.parse(JSON.stringify(obj)));
 
 function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 function nowMs(){ return Date.now(); }
@@ -305,8 +303,6 @@ const defaultState = {
   index: 0,
   answers: {},              // qid -> {pick, correct}
   flags: {},                // qid -> true
-  boardPosts: [],
-  board: { draft: { name: "", topic: "", prompt: "" }, editingId: null },
   settings: { mode:"study", shuffleQuestions:false, shuffleAnswers:false, timerOn:true, showAllOptionFeedback:true, tagFilter:"All" },
   genForm: {
     topic: "",
@@ -322,7 +318,7 @@ const defaultState = {
   elapsed: 0
 };
 
-let state = clone(defaultState);
+let state = structuredClone(defaultState);
 
 // ---- quiz helpers ----
 function fmtTime(ms){
@@ -395,86 +391,6 @@ function toggleFlag(qid){
 }
 function goPrev(){ state.index = clamp(state.index-1, 0, state.order.length-1); saveState(state); render(); }
 function goNext(){ state.index = clamp(state.index+1, 0, state.order.length-1); saveState(state); render(); }
-
-function newId(){
-  return (crypto.randomUUID && crypto.randomUUID()) || `${Date.now()}-${Math.random()}`;
-}
-
-function setBoardDraft(p){
-  state.board.draft = { name: p.name || "", topic: p.topic || "", prompt: p.prompt || "" };
-}
-
-async function shareBoardLink(){
-  const payload = { v: 1, boardPosts: state.boardPosts || [] };
-  const code = await encodeToHash(payload);
-  const url = `${location.origin}${location.pathname}#b=${code}`;
-  const ok = await copyToClipboard(url);
-  alert(ok ? "Board link copied!" : "Couldn’t copy link.");
-}
-
-function addBoardPost(){
-  const d = state.board.draft;
-  if (!d.name.trim() || !d.topic.trim() || !d.prompt.trim()){
-    alert("Fill in Name, Topic, and Prompt.");
-    return;
-  }
-  state.boardPosts.unshift({
-    id: newId(),
-    name: d.name.trim(),
-    topic: d.topic.trim(),
-    prompt: d.prompt.trim(),
-    createdAt: new Date().toISOString()
-  });
-  state.board.editingId = null;
-  setBoardDraft({name:"", topic:"", prompt:""});
-  saveState(state);
-  render();
-}
-
-function startEditBoardPost(id){
-  const p = state.boardPosts.find(x => x.id === id);
-  if (!p) return;
-  state.board.editingId = id;
-  setBoardDraft(p);
-  saveState(state);
-  render();
-}
-
-function saveEditBoardPost(){
-  const id = state.board.editingId;
-  const p = state.boardPosts.find(x => x.id === id);
-  if (!p) return;
-
-  const d = state.board.draft;
-  if (!d.name.trim() || !d.topic.trim() || !d.prompt.trim()){
-    alert("Fill in Name, Topic, and Prompt.");
-    return;
-  }
-
-  p.name = d.name.trim();
-  p.topic = d.topic.trim();
-  p.prompt = d.prompt.trim();
-  p.updatedAt = new Date().toISOString();
-
-  state.board.editingId = null;
-  setBoardDraft({name:"", topic:"", prompt:""});
-  saveState(state);
-  render();
-}
-
-function cancelEditBoardPost(){
-  state.board.editingId = null;
-  setBoardDraft({name:"", topic:"", prompt:""});
-  saveState(state);
-  render();
-}
-
-function deleteBoardPost(id){
-  if (!confirm("Delete this prompt post?")) return;
-  state.boardPosts = state.boardPosts.filter(x => x.id !== id);
-  saveState(state);
-  render();
-}
 
 // ---- screens ----
 function renderImport(){
@@ -608,47 +524,6 @@ function renderImport(){
         </div>
       `}
     </section>
-
-    <section class="card" style="margin-top:14px">
-      <div class="cardHeader">
-        <div>
-          <p class="title">Prompt Board</p>
-          <p class="desc">Post prompts for friends. Copy, edit, delete, or share the whole board by link.</p>
-        </div>
-        <div class="actions" style="margin-top:0">
-          <button class="btn small" id="btnShareBoard">Share Board Link</button>
-          <button class="btn small danger" id="btnClearBoard">Clear</button>
-        </div>
-      </div>
-
-      <div class="twoCol">
-        <div>
-          <label class="desc">From (Name)</label>
-          <input id="boardName" placeholder="ex: Joshua" value="${escapeHtml(state.board.draft.name)}" />
-        </div>
-        <div>
-          <label class="desc">Topic</label>
-          <input id="boardTopic" placeholder="ex: APUSH Units 1–5" value="${escapeHtml(state.board.draft.topic)}" />
-        </div>
-      </div>
-
-      <div style="margin-top:10px">
-        <label class="desc">Prompt</label>
-        <textarea id="boardPrompt" placeholder="Paste the prompt here...">${escapeHtml(state.board.draft.prompt)}</textarea>
-      </div>
-
-      <div class="actions">
-        ${state.board.editingId
-          ? `<button class="btn primary" id="btnSaveBoardEdit">Save Edit</button>
-             <button class="btn" id="btnCancelBoardEdit">Cancel</button>`
-          : `<button class="btn primary" id="btnAddBoardPost">Post</button>`
-        }
-      </div>
-
-      <div class="hr"></div>
-
-      <div id="boardList"></div>
-    </section>
   `;
 
   $("#tabGen").onclick = ()=>{ state.activeTab="generator"; saveState(state); render(); };
@@ -656,84 +531,6 @@ function renderImport(){
 
   $("#btnShareCurrent").onclick = shareLinkCurrent;
 
-  // ---- Prompt Board hooks ----
-  const renderBoardList = () => {
-    const wrap = document.getElementById("boardList");
-    if (!wrap) return;
-
-    if (!state.boardPosts.length){
-      wrap.innerHTML = `<p class="notice">No prompts yet. Add one above.</p>`;
-      return;
-    }
-
-    wrap.innerHTML = state.boardPosts.map(p => `
-      <div class="card flat" style="margin-bottom:10px">
-        <div class="kv">
-          <div>
-            <div style="font-weight:650">${escapeHtml(p.topic)}</div>
-            <small>From: <b>${escapeHtml(p.name)}</b></small>
-          </div>
-          <div class="actions" style="margin-top:0">
-            <button class="btn small" data-copy="${p.id}">Copy Prompt</button>
-            <button class="btn small" data-edit="${p.id}">Edit</button>
-            <button class="btn small danger" data-del="${p.id}">Delete</button>
-          </div>
-        </div>
-        <div class="hr"></div>
-        <div class="desc" style="white-space:pre-wrap">${escapeHtml(p.prompt.slice(0, 420))}${p.prompt.length>420?"…":""}</div>
-      </div>
-    `).join("");
-
-    wrap.querySelectorAll("[data-copy]").forEach(btn => {
-      btn.onclick = async () => {
-        const id = btn.getAttribute("data-copy");
-        const post = state.boardPosts.find(x => x.id === id);
-        if (!post) return;
-        const ok = await copyToClipboard(post.prompt);
-        alert(ok ? "Prompt copied!" : "Couldn’t copy.");
-      };
-    });
-
-    wrap.querySelectorAll("[data-edit]").forEach(btn => {
-      btn.onclick = () => startEditBoardPost(btn.getAttribute("data-edit"));
-    });
-
-    wrap.querySelectorAll("[data-del]").forEach(btn => {
-      btn.onclick = () => deleteBoardPost(btn.getAttribute("data-del"));
-    });
-  };
-
-  const nameEl = document.getElementById("boardName");
-  const topicEl = document.getElementById("boardTopic");
-  const promptEl = document.getElementById("boardPrompt");
-
-  if (nameEl) nameEl.oninput = (e)=>{ state.board.draft.name = e.target.value; saveState(state); };
-  if (topicEl) topicEl.oninput = (e)=>{ state.board.draft.topic = e.target.value; saveState(state); };
-  if (promptEl) promptEl.oninput = (e)=>{ state.board.draft.prompt = e.target.value; saveState(state); };
-
-  const addBtn = document.getElementById("btnAddBoardPost");
-  if (addBtn) addBtn.onclick = addBoardPost;
-
-  const saveBtn = document.getElementById("btnSaveBoardEdit");
-  if (saveBtn) saveBtn.onclick = saveEditBoardPost;
-
-  const cancelBtn = document.getElementById("btnCancelBoardEdit");
-  if (cancelBtn) cancelBtn.onclick = cancelEditBoardPost;
-
-  const shareBtn = document.getElementById("btnShareBoard");
-  if (shareBtn) shareBtn.onclick = shareBoardLink;
-
-  const clearBtn = document.getElementById("btnClearBoard");
-  if (clearBtn) clearBtn.onclick = ()=>{
-    if (!confirm("Clear the entire Prompt Board?")) return;
-    state.boardPosts = [];
-    saveState(state);
-    render();
-  };
-
-  renderBoardList();
-
-  
   // generator tab hooks
   if (active==="generator"){
     function updatePromptPreview(){
@@ -907,7 +704,7 @@ async function shareLinkCurrent(){
 async function shareLinkFromText(text){
   const {questions, errors} = parseQuizText(text);
   if (errors.length) return alert("Fix formatting errors first.");
-  const pkg = clone(defaultState);
+  const pkg = structuredClone(defaultState);
   pkg.quiz = { questions, meta: { source:"shared-text", createdAt:new Date().toISOString() } };
   pkg.order = questions.map((_,i)=>i);
   pkg.route = "quiz";
@@ -1230,7 +1027,7 @@ function renderSettingsDrawer(){
   $("#btnResetAll").onclick = ()=>{
     if (!confirm("Reset everything? This clears your quiz + progress.")) return;
     clearState();
-    state = clone(defaultState);
+    state = structuredClone(defaultState);
     location.hash = "";
     render();
   };
@@ -1243,17 +1040,6 @@ function renderSettingsDrawer(){
 // ---- boot: load hash → localStorage → default ----
 (async function boot(){
   const hash = location.hash || "";
-  const bh = hash.match(/#b=([^&]+)/);
-  if (bh?.[1]){
-    const decoded = await decodeFromHash(bh[1]);
-    if (decoded?.boardPosts){
-      state.boardPosts = decoded.boardPosts;
-      state.route = "import";
-      saveState(state);
-      render();
-      return;
-    }
-  }
   const m = hash.match(/#q=([^&]+)/);
   if (m?.[1]){
     const decoded = await decodeFromHash(m[1]);
