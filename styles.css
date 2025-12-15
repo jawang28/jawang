@@ -14,6 +14,14 @@
 }
 
 *{ box-sizing:border-box; }
+button{
+  color: inherit;
+  font: inherit;
+}
+
+.choice{
+  color: var(--text);
+}
 html,body{ height:100%; }
 body{
   margin:0;
