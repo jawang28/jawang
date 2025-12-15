@@ -118,12 +118,17 @@ function parseQuizText(text){
   let cur=[], nums=[];
   for (let i=0;i<lines.length;i++){
     const line=lines[i], ln=i+1;
-    if (/^-{3,}$/.test(line.trim())){
+    if (/^[-–—_]{3,}$/.test(line.trim())){
       if (cur.some(x=>x.trim()!=="")) blocks.push({lines:cur, lineNums:nums});
       cur=[]; nums=[];
       continue;
     }
     cur.push(line); nums.push(ln);
+  }
+  
+  // If the text doesn't end with a separator, still include the last block
+  if (cur.some(x => x.trim() !== "")) {
+    blocks.push({ lines: cur, lineNums: nums });
   }
 
   const errors=[], questions=[];
